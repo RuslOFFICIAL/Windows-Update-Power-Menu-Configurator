@@ -1,4 +1,5 @@
 # Configuration.
+$version = "2.1.0"
 $regPath = "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\Orchestrator"
 $regName = "ShutdownFlyoutOptions"
 $targetValue = 5
@@ -15,7 +16,7 @@ $logPath = Join-Path -Path $basePath -ChildPath "Windows-Update-Power-Options.lo
 $actionTaken = "Unknown"
 $errorOccurred = $false
 
-Write-Host "Windows-Update-Power-Options Version 2.0.0"
+Write-Host "Windows-Update-Power-Options Version $version"
 
 # Confirmation.
 $confirmation = Read-Host "Are you sure you want to run this script? (Y/N)"
@@ -60,7 +61,7 @@ try {
     $logEntry = "$(Get-Date) - Action: $actionTaken"
     Add-Content -Path $logPath -Value $logEntry -ErrorAction SilentlyContinue
     Write-Host "Log written: $logEntry" -ForegroundColor Gray
-
+    Write-Host "Log file is at: $logPath" -ForegroundColor Gray
 }
 catch {
     $errorMsg = "CRITICAL ERROR: $($_.Exception.Message)"
@@ -69,16 +70,18 @@ catch {
     try {
         Add-Content -Path $logPath -Value "$(Get-Date): $errorMsg" -ErrorAction Stop
         Write-Host "Error log written: $errorMsg" -ForegroundColor Red
+	Write-Host "Log file is at $logPath" -ForegroundColor Gray
     }
     catch {
         # Fallback: Write to Windows Event Log.
         Write-Host "Failed to write to log file. Writing to Event Log instead..." -ForegroundColor Red
         try {
-            if (-not [System.Diagnostics.EventLog]::SourceExists("MyScriptErrorLog")) {
-                New-EventLog -LogName Application -Source "MyScriptErrorLog" -ErrorAction SilentlyContinue
+            if (-not [System.Diagnostics.EventLog]::SourceExists("Windows-Update-Power-Options_Error-Log")) {
+                New-EventLog -LogName Application -Source "Windows-Update-Power-Options_Error-Log" -ErrorAction SilentlyContinue
             }
-            Write-EventLog -LogName Application -Source "MyScriptErrorLog" -EntryType Error -EventId 1000 -Message "Script Error: $errorMsg"
+            Write-EventLog -LogName Application -Source "Windows-Update-Power-Options_Error-Log" -EntryType Error -EventId 1000 -Message "Script Error: $errorMsg"
             Write-Host "Error written to Windows Event Viewer." -ForegroundColor Red
+	    Write-Host "Event log is named: Windows-Update-Power-Options_Error-Log"
         }
         catch {
             Write-Host "CRITICAL: Could not write to file OR Event Log. Error: $($_.Exception.Message)" -ForegroundColor DarkRed
