@@ -1,11 +1,25 @@
 # Configuration.
-$version = "2.2.0"
+$version = "3.0-1.1"
 $regPath = "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\Orchestrator"
 $regName = "ShutdownFlyoutOptions"
 $targetValue = 5
 
+# Admin check.
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if (-not $isAdmin) {
+    Write-Host "CRITICAL ERROR: This script must be run as an Administrator!" -ForegroundColor Red
+    Write-Host "Please run the script as an Administrator." -ForegroundColor Yellow
+    pause
+    exit 1
+}
+
 # Log file location.
-$basePath = Join-Path -Path $env:LOCALAPPDATA -ChildPath "Temp\R&C\Windows-Update-Power-Options"
+$loggedInUser = (Get-CimInstance Win32_ComputerSystem).UserName -replace '.*\\'
+if ($loggedInUser) {
+	$basePath = "C:\Users\$loggedInUser\AppData\Local\Temp\R&C\Windows-Update-Power-Options"
+} else {
+	$basePath = Join-Path -Path $env:LOCALAPPDATA -ChildPath "Temp\R&C\Windows-Update-Power-Options"
+}
 if (-not (Test-Path $basePath)) {
     New-Item -Path $basePath -ItemType Directory -Force | Out-Null
 }
@@ -61,7 +75,8 @@ try {
     $logEntry = "$(Get-Date) - Action: $actionTaken"
     Add-Content -Path $logPath -Value $logEntry -ErrorAction SilentlyContinue
     Write-Host "Log written: $logEntry" -ForegroundColor Gray
-    Write-Host "Log file is at: $logPath" -ForegroundColor Gray
+    Write-Host "Log file is at: " -NoNewLine -ForegroundColor Gray
+    Write-Host $logPath -ForegroundColor Cyan
 }
 catch {
     $errorMsg = "CRITICAL ERROR: $($_.Exception.Message)"
@@ -70,7 +85,8 @@ catch {
     try {
         Add-Content -Path $logPath -Value "$(Get-Date): $errorMsg" -ErrorAction Stop
         Write-Host "Error log written: $errorMsg" -ForegroundColor Red
-	Write-Host "Log file is at $logPath" -ForegroundColor Gray
+	Write-Host "Log file is at: " -NoNewLine -ForegroundColor Gray
+	Write-Host $logPath -ForegroundColor Cyan
     }
     catch {
         # Fallback: Write to Windows Event Log.
