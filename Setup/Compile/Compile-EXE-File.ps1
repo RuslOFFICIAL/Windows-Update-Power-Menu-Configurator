@@ -14,6 +14,7 @@ if (Test-Path $configFile) {
 	Write-Host "Warning: Info.conf not found at $configFile. Using default version string." -ForegroundColor Yellow
 }
 
+$programDir = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Program"
 $inputFile = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Program\WUPMC.ps1"
 $outputFile = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Program\WUPMC_$version.exe"
 
@@ -25,7 +26,14 @@ if (-not (Test-Path $inputFile)) {
 	exit
 }
 
-Write-Host "Compiling 'WUPMC.ps1' to EXE file..."
+# Deleting other EXE files.
+$oldFiles = Get-ChildItem -Path "$programDir\WUPMC_*.exe"
+foreach ($file in $oldFiles) {
+	Write-Host "Removing old EXE: '$($file.Name)'"
+	Remove-Item $file.FullName -Force
+}
+
+Write-Host "`nCompiling 'WUPMC.ps1' to EXE file..."
 
 # Allow running the script.
 Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
