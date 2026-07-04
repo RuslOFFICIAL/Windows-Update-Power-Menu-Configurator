@@ -51,12 +51,13 @@ Write-Host "Windows-Update-Power-Menu-Configurator (WUPMC) Version $version"
 $confirmation = Read-Host "Are you sure you want to run this script? (Y/N)"
 
 if ($confirmation -ne 'Y' -and $confirmation -ne 'y') {
-	Write-Host "Operation cancelled by user." -ForegroundColor Yellow
+	Write-Host "`nOperation cancelled by user." -ForegroundColor Yellow
 	pause
 	exit
 }
 
 # Main process.
+Write-Host ""
 try {
 	# Ensure the Registry Path exists.
 	if (-not (Test-Path $regPath)) {
