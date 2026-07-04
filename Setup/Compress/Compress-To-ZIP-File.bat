@@ -4,7 +4,7 @@ setlocal enabledelayedexpansion
 
 REM .conf files.
 if exist "..\..\Info.conf" (
-    for /f "usebackq eol=# tokens=1,2 delims==" %%A in ("..\..\Info.conf") do set "%%A=%%~B"
+	for /f "usebackq eol=# tokens=1,2 delims==" %%A in ("..\..\Info.conf") do set "%%A=%%~B"
 )
 
 goto CompressingProc
