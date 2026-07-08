@@ -10,4 +10,4 @@ Version (N1.N2-N3.N4-N5) meaning:
 - N2 means a small change which can be noticed in the code in the Program part of project.
 - N3 means a noticeable-big change in the Setup part of project.
 - N4 means a small change which can be noticed in the code in the Setup part of project.
-- N5 means a little change.
+- N5 means a little change which does not really matter.
