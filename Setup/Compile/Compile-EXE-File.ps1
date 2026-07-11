@@ -17,6 +17,8 @@ if (Test-Path $configFile) {
 $programDir = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Program"
 $inputFile = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Program\WUPMC.ps1"
 $outputFile = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Program\WUPMC_$version.exe"
+$infoConf = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Info.conf"
+$releasesDir = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Releases"
 
 # Check if input file exists.
 if (-not (Test-Path $inputFile)) {
@@ -27,10 +29,15 @@ if (-not (Test-Path $inputFile)) {
 }
 
 # Deleting other EXE files.
-$oldFiles = Get-ChildItem -Path "$programDir\WUPMC_*.exe"
-foreach ($file in $oldFiles) {
-	Write-Host "Removing old EXE: '$($file.Name)'"
-	Remove-Item $file.FullName -Force
+$pathsToClean = @($programDir, $releasesDir)
+foreach ($dir in $pathsToClean) {
+    if (Test-Path $dir) {
+        $oldFiles = Get-ChildItem -Path "$dir\WUPMC_*.exe"
+        foreach ($file in $oldFiles) {
+            Write-Host "Removing old EXE: '$($file.Name)' from $dir"
+            Remove-Item $file.FullName -Force
+        }
+    }
 }
 
 Write-Host "`nCompiling 'WUPMC.ps1' to EXE file..."
@@ -50,7 +57,23 @@ Import-Module ps2exe
 # Compile.
 Invoke-PS2EXE -InputFile $inputFile `
 	-OutputFile $outputFile `
+	-EmbedFiles @{"$env:TEMP\R&C\WUPMC\Info.conf" = $infoConf} `
 	-RequireAdmin
+
+# Copy to Releases folder.
+if (-not (Test-Path -Path $releasesDir -PathType Container)) {
+	try {
+		Write-Host "Releases folder not found at: $releasesDir. Creating it..." -ForegroundColor Yellow
+		New-Item -Path "$releasesDir" -ItemType Directory
+	}
+	catch {
+		Write-Error "Failed to create folder: $_"
+	}
+}
+
+Write-Host "Copying EXE to Releases folder..."
+Copy-Item -Path $outputFile -Destination $releasesDir -Force
+Write-Host "File copied successfully." -ForegroundColor Cyan
 
 # Result.
 if (Test-Path $outputFile) {

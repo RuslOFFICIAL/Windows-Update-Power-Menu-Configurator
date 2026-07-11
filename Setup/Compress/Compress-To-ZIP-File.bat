@@ -15,16 +15,19 @@ REM Define paths relative to the script location.
 set "SourceDir=..\.."
 set "StagingDir=..\..\TempRelease"
 set "ZipFolder=..\..\Releases"
-set "ZipFile=%ZipFolder%\WUPMC_%Version%.zip"
+set "ZipFile=%ZipFolder%\WUPMC_%Version%_Full.zip"
 
-echo Preparing release folder (excluding all .conf files)...
+REM Deleting other ZIP files.
+echo Deleting old ZIP files...
+for %%f in ("%ZipFolder%\WUPMC_*.zip") do (
+	echo Removing old ZIP: "%%~nxf"
+	del "%%f" /f /q
+)
+
+echo Preparing release folder...
 robocopy "%SourceDir%" "%StagingDir%" /E /XF *.lnk /XD TempRelease Releases .git
 
-echo Including 'WUPMC.lnk' in release...
-copy "..\..\WUPMC.lnk" "%StagingDir%\"
-
-echo.
-echo Compressing into .zip file...
+echo.&echo Compressing into .zip file...
 REM Create the output directory if it doesn't exist.
 if not exist "%ZipFolder%" mkdir "%ZipFolder%"
 

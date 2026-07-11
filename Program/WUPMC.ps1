@@ -1,6 +1,13 @@
 # Configuration.
 $baseDir = if ($null -ne $ScriptRoot) { $ScriptRoot } else { if ($null -ne $PSScriptRoot) { $PSScriptRoot } else { [System.AppDomain]::CurrentDomain.BaseDirectory } }
-$configFile = Join-Path -Path $baseDir -ChildPath "..\Info.conf"
+
+# .conf files.
+$pathsToCheck = @(
+    (Join-Path -Path $baseDir -ChildPath "..\Info.conf"),
+    (Join-Path -Path $env:TEMP -ChildPath "R&C\WUPMC\Info.conf")
+)
+
+$configFile = $pathsToCheck | Where-Object { Test-Path $_ } | Select-Object -First 1
 
 $version = "Unknown"
 if (Test-Path $configFile) {
