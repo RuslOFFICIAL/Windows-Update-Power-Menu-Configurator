@@ -20,7 +20,7 @@ set "ZipFile=%ZipFolder%\WUPMC_%Version%_Full.zip"
 REM Deleting other ZIP files.
 echo Deleting old ZIP files...
 for %%f in ("%ZipFolder%\WUPMC_*.zip") do (
-	echo Removing old ZIP: "%%~nxf"
+	echo Removing old ZIP: "%%~nxf"...
 	del "%%f" /f /q
 )
 

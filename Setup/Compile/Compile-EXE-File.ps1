@@ -34,7 +34,7 @@ foreach ($dir in $pathsToClean) {
     if (Test-Path $dir) {
         $oldFiles = Get-ChildItem -Path "$dir\WUPMC_*.exe"
         foreach ($file in $oldFiles) {
-            Write-Host "Removing old EXE: '$($file.Name)' from $dir"
+            Write-Host "Removing old EXE: '$($file.Name)' from '$dir'..."
             Remove-Item $file.FullName -Force
         }
     }
