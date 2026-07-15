@@ -13,7 +13,7 @@ Version (N1.N2-N3.N4-N5) meaning:
 - N4 means a small change which can be noticed in the code in the Setup part of project.
 - N5 means a little change which does not really matter.
 
-Note about TargetValue. It goes from 0 to 15. To make sure the program will be useful, use decimal numbers in the TargetDir value in Info.conf.
+Note about TargetValue. It goes from 0 to 15. To make sure the program will be useful, use decimal numbers in the TargetValue value in Info.conf.
 Values for TargetValue is in the next table.
  __________________________
 |Decimal|Hexadecimal|Binary|
