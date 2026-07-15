@@ -35,3 +35,8 @@ Values for TargetValue is in the next table.
 |  14   |     e     | 1110 |
 |  15   |     f     | 1111 |
  --------------------------
+Binary (B1.B2.B3.B4) meaning. 1 means enables, 0 means disabled. More:
+ - B1 means the status of "Update and Shutdown" button.
+ - B2 means the status of "Shutdown" button.
+ - B3 means the status of "Update and Restart" button.
+ - B4 means the status of "Restart" button.
