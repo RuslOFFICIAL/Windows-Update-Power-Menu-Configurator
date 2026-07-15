@@ -10,21 +10,38 @@ $pathsToCheck = @(
 $configFile = $pathsToCheck | Where-Object { Test-Path $_ } | Select-Object -First 1
 
 $version = "Unknown"
+$regPath = "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\Orchestrator"
+$regName = "ShutdownFlyoutOptions"
+$targetValue = $null
+
 if (Test-Path $configFile) {
-	$rawLine = (Get-Content -Path $configFile -TotalCount 1).Trim()
+	$content = Get-Content -Path $configFile
 	
+	$rawLine = $content[0].Trim()
+	
+	# Version.
 	if ($rawLine -match '(?i)version\s*=\s*"?([^"\s]+)"?') {
-		$version = $Matches[1]
+        	$version = $Matches[1]
 	} else {
 		$version = $rawLine -replace '[\s"=\\]', ''
 	}
-} else {
+	
+	# TargetValue.
+	$targetLine = $content | Where-Object { $_ -match '(?i)targetValue\s*=\s*"?(\d+)"?' }
+	if ($targetLine -match 'targetValue\s*=\s*"?(\d+)"?') {
+		$targetValue = [int]$Matches[1]
+	}
+}
+
+# If not found the value.
+if ("Unknown" -eq $version) {
 	Write-Host "Warning: Info.conf not found at $configFile. Using default version string." -ForegroundColor Yellow
 }
 
-$regPath = "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\Orchestrator"
-$regName = "ShutdownFlyoutOptions"
-$targetValue = 5
+if ($null -eq $targetValue) {
+	Write-Host "Warning: targetValue not found in Info.conf. Defaulting to 5." -ForegroundColor Yellow
+	$targetValue = 5
+}
 
 # Admin check.
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
