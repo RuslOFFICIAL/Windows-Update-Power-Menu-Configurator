@@ -2,6 +2,9 @@
 setlocal
 cd /d "%~dp0"
 
+REM Self-unblock.
+powershell -NoProfile -Command "$filePath = '%~f0'; if (Get-Item -LiteralPath $filePath -Stream 'Zone.Identifier' -ErrorAction SilentlyContinue) { Unblock-File -LiteralPath $filePath }"
+
 REM Main process.
 for %%f in ("%~dp0Program\WUPMC_*.exe") do (
 	echo Processing file: "%%~nxf"...

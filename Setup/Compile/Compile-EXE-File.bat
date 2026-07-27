@@ -1,4 +1,9 @@
 @echo off
+setlocal
+cd /d "%~dp0"
+
+REM Self-unblock.
+powershell -NoProfile -Command "$filePath = '%~f0'; if (Get-Item -LiteralPath $filePath -Stream 'Zone.Identifier' -ErrorAction SilentlyContinue) { Unblock-File -LiteralPath $filePath }"
 
 REM Making shortcuts to folders.
 set "Compile=%~dp0"

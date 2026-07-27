@@ -52,8 +52,8 @@ if ($null -eq $targetValue) {
 # Admin check.
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 if (-not $isAdmin) {
-	Write-Host "CRITICAL ERROR: This script must be run as an Administrator!" -ForegroundColor Red
-	Write-Host "Please run the script as an Administrator." -ForegroundColor Yellow
+	Write-Host "CRITICAL ERROR: This file must be run as an Administrator!" -ForegroundColor Red
+	Write-Host "Please run the file as an Administrator." -ForegroundColor Yellow
 	pause
 	exit 1
 }

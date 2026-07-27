@@ -2,6 +2,9 @@
 cd /d "%~dp0"
 setlocal enabledelayedexpansion
 
+REM Self-unblock.
+powershell -NoProfile -Command "$filePath = '%~f0'; if (Get-Item -LiteralPath $filePath -Stream 'Zone.Identifier' -ErrorAction SilentlyContinue) { Unblock-File -LiteralPath $filePath }"
+
 REM .conf files.
 if exist "..\..\Info.conf" (
 	for /f "usebackq eol=# tokens=1,2 delims==" %%A in ("..\..\Info.conf") do set "%%A=%%~B"

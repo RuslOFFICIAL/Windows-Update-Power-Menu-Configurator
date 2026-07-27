@@ -1,3 +1,9 @@
+# Self-unblock.
+$currentAppPath = if ($PSCommandPath) { $PSCommandPath } else { ([Environment]::GetCommandLineArgs()[0]) }
+if ($currentAppPath -and (Test-Path $currentAppPath)) {
+	Unblock-File -Path $currentAppPath -ErrorAction SilentlyContinue
+}
+
 # Configuration.
 $configFile = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Info.conf"
 

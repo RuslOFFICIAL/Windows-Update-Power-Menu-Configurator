@@ -1,5 +1,8 @@
 @echo off
 
+REM Self-unblock.
+powershell -NoProfile -Command "$filePath = '%~f0'; if (Get-Item -LiteralPath $filePath -Stream 'Zone.Identifier' -ErrorAction SilentlyContinue) { Unblock-File -LiteralPath $filePath }"
+
 REM Variables.
 set "ProgramDir=%~dp0"
 set "TargetFile=%~dp0WUPMC.ps1"
