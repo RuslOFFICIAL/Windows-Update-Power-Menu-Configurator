@@ -111,8 +111,6 @@ try {
 		} else {
 			New-ItemProperty -Path $regPath -Name $regName -Value $targetValue -PropertyType DWord -Force -ErrorAction Stop
 		}
-        
-		# Only reach here if the update SUCCEEDED
 		$actionTaken = "Updated from $oldValue to $targetValue"
 	}
 
