@@ -1,3 +1,9 @@
+# Self-unblock.
+$currentAppPath = if ($PSCommandPath) { $PSCommandPath } else { ([Environment]::GetCommandLineArgs()[0]) }
+if ($currentAppPath -and (Test-Path $currentAppPath)) {
+	Unblock-File -Path $currentAppPath -ErrorAction SilentlyContinue
+}
+
 # Configuration.
 $baseDir = if ($null -ne $ScriptRoot) { $ScriptRoot } else { if ($null -ne $PSScriptRoot) { $PSScriptRoot } else { [System.AppDomain]::CurrentDomain.BaseDirectory } }
 
