@@ -5,7 +5,8 @@ if ($currentAppPath -and (Test-Path $currentAppPath)) {
 }
 
 # Configs.
-$configFile = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Configs\Variables.conf"
+$configFileName = "Variables.conf"
+$configFile = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Configs\$configFileName"
 
 $version = "Unknown"
 if (Test-Path $configFile) {
@@ -17,7 +18,7 @@ if (Test-Path $configFile) {
 		$version = $rawLine -replace '[\s"=\\]', ''
 	}
 } else {
-	Write-Host "Warning: Variables.conf not found at $configFile. Using default version string." -ForegroundColor Yellow
+	Write-Host "Warning: $configFileName not found at $configFile. Using default version string." -ForegroundColor Yellow
 }
 
 # Variables.
@@ -63,7 +64,7 @@ Import-Module ps2exe
 # Compile.
 Invoke-PS2EXE -InputFile $inputFile `
 	-OutputFile $outputFile `
-	-EmbedFiles @{"$env:TEMP\R&C\WUPMC\Variables.conf" = $configFile} `
+	-EmbedFiles @{"$env:TEMP\R&C\WUPMC\$configFileName" = $configFile} `
 	-RequireAdmin
 
 # Copy to Releases folder.

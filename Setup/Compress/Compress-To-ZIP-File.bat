@@ -6,7 +6,8 @@ REM Self-unblock.
 powershell -NoProfile -Command "$filePath = '%~f0'; if (Get-Item -LiteralPath $filePath -Stream 'Zone.Identifier' -ErrorAction SilentlyContinue) { Unblock-File -LiteralPath $filePath }"
 
 REM Variables.
-set "ConfFile=..\..\Configs\Variables.conf"
+set "ConfFileName=Variables.conf"
+set "ConfFile=..\..\Configs\%ConfFileName%"
 
 REM Configs.
 if exist "%ConfFile%" (
@@ -34,7 +35,7 @@ for %%f in ("%ZipFolder%\WUPMC_*.zip") do (
 echo Preparing release folder...
 robocopy "%SourceDir%" "%StagingDir%" /E /XF *.conf *.lnk /XD TempRelease Releases .git
 
-echo Including 'Variables.conf' in release...
+echo Including '%ConfFileName%' in release...
 if not exist "%ConfigsDir%" mkdir "%ConfigsDir%"
 copy "%ConfFile%" "%ConfigsDir%"
 
