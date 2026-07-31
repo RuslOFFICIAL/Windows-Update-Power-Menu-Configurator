@@ -33,7 +33,7 @@ for %%f in ("%ZipFolder%\WUPMC_*.zip") do (
 )
 
 echo Preparing release folder...
-robocopy "%SourceDir%" "%StagingDir%" /E /XF *.conf *.lnk /XD TempRelease Releases .git
+robocopy "%SourceDir%" "%StagingDir%" /E /XF *.conf *.lnk /XD TempRelease Releases .git Configs
 
 echo Including '%VariablesFileName%' in release...
 if not exist "%ConfigsDir%" mkdir "%ConfigsDir%"
