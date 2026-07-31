@@ -4,8 +4,8 @@ if ($currentAppPath -and (Test-Path $currentAppPath)) {
 	Unblock-File -Path $currentAppPath -ErrorAction SilentlyContinue
 }
 
-# Configuration.
-$configFile = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Info.conf"
+# Configs.
+$configFile = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Configs\Variables.conf"
 
 $version = "Unknown"
 if (Test-Path $configFile) {
@@ -17,13 +17,13 @@ if (Test-Path $configFile) {
 		$version = $rawLine -replace '[\s"=\\]', ''
 	}
 } else {
-	Write-Host "Warning: Info.conf not found at $configFile. Using default version string." -ForegroundColor Yellow
+	Write-Host "Warning: Variables.conf not found at $configFile. Using default version string." -ForegroundColor Yellow
 }
 
+# Variables.
 $programDir = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Program"
 $inputFile = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Program\WUPMC.ps1"
 $outputFile = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Program\WUPMC_$version.exe"
-$infoConf = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Info.conf"
 $releasesDir = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Releases"
 
 # Check if input file exists.
@@ -63,7 +63,7 @@ Import-Module ps2exe
 # Compile.
 Invoke-PS2EXE -InputFile $inputFile `
 	-OutputFile $outputFile `
-	-EmbedFiles @{"$env:TEMP\R&C\WUPMC\Info.conf" = $infoConf} `
+	-EmbedFiles @{"$env:TEMP\R&C\WUPMC\Variables.conf" = $configFile} `
 	-RequireAdmin
 
 # Copy to Releases folder.

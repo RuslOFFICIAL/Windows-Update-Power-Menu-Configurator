@@ -7,12 +7,12 @@ if ($currentAppPath -and (Test-Path $currentAppPath)) {
 # Configuration.
 $baseDir = if ($null -ne $ScriptRoot) { $ScriptRoot } else { if ($null -ne $PSScriptRoot) { $PSScriptRoot } else { [System.AppDomain]::CurrentDomain.BaseDirectory } }
 
-# .conf files.
+# Configs.
+$configFileName = "Variables.conf"
 $pathsToCheck = @(
-    (Join-Path -Path $baseDir -ChildPath "..\Info.conf"),
-    (Join-Path -Path $env:TEMP -ChildPath "R&C\WUPMC\Info.conf")
+    (Join-Path -Path $baseDir -ChildPath "..\Configs\$configFileName"),
+    (Join-Path -Path $env:TEMP -ChildPath "R&C\WUPMC\$configFileName")
 )
-
 $configFile = $pathsToCheck | Where-Object { Test-Path $_ } | Select-Object -First 1
 
 $version = "Unknown"
@@ -41,11 +41,11 @@ if (Test-Path $configFile) {
 
 # If not found the value.
 if ("Unknown" -eq $version) {
-	Write-Host "Warning: Info.conf not found at $configFile. Using default version string." -ForegroundColor Yellow
+	Write-Host "Warning: '$configFileName' not found at '$configFile'. Using default version string." -ForegroundColor Yellow
 }
 
 if ($null -eq $targetValue) {
-	Write-Host "Warning: targetValue not found in Info.conf. Defaulting to 5." -ForegroundColor Yellow
+	Write-Host "Warning: targetValue not found in '$configFileName'. Defaulting to 5." -ForegroundColor Yellow
 	$targetValue = 5
 }
 

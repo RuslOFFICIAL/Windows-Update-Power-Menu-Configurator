@@ -5,9 +5,12 @@ setlocal enabledelayedexpansion
 REM Self-unblock.
 powershell -NoProfile -Command "$filePath = '%~f0'; if (Get-Item -LiteralPath $filePath -Stream 'Zone.Identifier' -ErrorAction SilentlyContinue) { Unblock-File -LiteralPath $filePath }"
 
-REM .conf files.
-if exist "..\..\Info.conf" (
-	for /f "usebackq eol=# tokens=1,2 delims==" %%A in ("..\..\Info.conf") do set "%%A=%%~B"
+REM Variables.
+set "ConfFile=..\..\Configs\Variables.conf"
+
+REM Configs.
+if exist "%ConfFile%" (
+	for /f "usebackq eol=# tokens=1,2 delims==" %%A in ("%ConfFile%") do set "%%A=%%~B"
 )
 
 goto CompressingProc
@@ -17,6 +20,7 @@ REM Compressing process.
 REM Define paths relative to the script location.
 set "SourceDir=..\.."
 set "StagingDir=..\..\TempRelease"
+set "ConfigsDir=%StagingDir%\Configs"
 set "ZipFolder=..\..\Releases"
 set "ZipFile=%ZipFolder%\WUPMC_%Version%_Full.zip"
 
@@ -28,7 +32,11 @@ for %%f in ("%ZipFolder%\WUPMC_*.zip") do (
 )
 
 echo Preparing release folder...
-robocopy "%SourceDir%" "%StagingDir%" /E /XF *.lnk /XD TempRelease Releases .git
+robocopy "%SourceDir%" "%StagingDir%" /E /XF *.conf *.lnk /XD TempRelease Releases .git
+
+echo Including 'Variables.conf' in release...
+if not exist "%ConfigsDir%" mkdir "%ConfigsDir%"
+copy "%ConfFile%" "%ConfigsDir%"
 
 echo.&echo Compressing into .zip file...
 REM Create the output directory if it doesn't exist.
