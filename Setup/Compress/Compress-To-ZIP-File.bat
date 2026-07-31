@@ -6,12 +6,12 @@ REM Self-unblock.
 powershell -NoProfile -Command "$filePath = '%~f0'; if (Get-Item -LiteralPath $filePath -Stream 'Zone.Identifier' -ErrorAction SilentlyContinue) { Unblock-File -LiteralPath $filePath }"
 
 REM Variables.
-set "ConfFileName=Variables.conf"
-set "ConfFile=..\..\Configs\%ConfFileName%"
+set "VariablesFileName=Variables.conf"
+set "VariablesFile=..\..\Configs\%VariablesFileName%"
 
 REM Configs.
-if exist "%ConfFile%" (
-	for /f "usebackq eol=# tokens=1,2 delims==" %%A in ("%ConfFile%") do set "%%A=%%~B"
+if exist "%VariablesFile%" (
+	for /f "usebackq eol=# tokens=1,2 delims==" %%A in ("%VariablesFile%") do set "%%A=%%~B"
 )
 
 goto CompressingProc
@@ -35,9 +35,9 @@ for %%f in ("%ZipFolder%\WUPMC_*.zip") do (
 echo Preparing release folder...
 robocopy "%SourceDir%" "%StagingDir%" /E /XF *.conf *.lnk /XD TempRelease Releases .git
 
-echo Including '%ConfFileName%' in release...
+echo Including '%VariablesFileName%' in release...
 if not exist "%ConfigsDir%" mkdir "%ConfigsDir%"
-copy "%ConfFile%" "%ConfigsDir%"
+copy "%VariablesFile%" "%ConfigsDir%"
 
 echo.&echo Compressing into .zip file...
 REM Create the output directory if it doesn't exist.
