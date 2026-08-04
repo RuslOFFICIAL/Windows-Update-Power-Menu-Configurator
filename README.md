@@ -2,8 +2,9 @@ Windows-Update-Power-Menu Configurator (WUPMC) is a simple project to bypass for
 Should work properly on Windows 10 and 11.
 WUPMC only removes Update buttons in Power Menu. It does not remove whole Windows Update.
 If you use release .EXE file, to execute the program, simply run the .EXE file from release.
+There is two .EXE file: First a manual version, Second a background version.
 If you use full .ZIP file, to execute the program, run the file "WUPMC.bat" in the root folder of the project, or run .EXE file in the Program folder.
-This project also includes basic method for compiling a file to .EXE file and making a .ZIP file.
+This project also includes basic method for compiling a file to .EXE file out of .PS1 file and making a .ZIP file.
 I hope someone will find it useful for themselves. :3
 
 If you just want the working Program part, then look at N1 and N2.

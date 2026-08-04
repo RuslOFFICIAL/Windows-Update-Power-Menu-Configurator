@@ -60,6 +60,20 @@ if (-not (Test-Path -Path $releasesDir -PathType Container)) {
 	}
 }
 
+# Stop running WUPMC processes.
+Write-Host "Stopping any running WUPMC processes..." -ForegroundColor Yellow
+$processesToStop = @($inputFileName1, $inputFileName2, "${inputFileName1}_*", "${inputFileName2}_*")
+
+foreach ($procName in $processesToStop) {
+	if ($procName -like "*\*") { continue }
+	
+	Get-Process -Name $procName -ErrorAction SilentlyContinue | ForEach-Object {
+	Write-Host "Stopping process: $($_.Name) (PID: $($_.Id))"
+	Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue
+	}
+}
+Start-Sleep -Seconds 1
+
 # Deleting other EXE files.
 $pathsToClean = @($programDir, $releasesDir)
 foreach ($dir in $pathsToClean) {
