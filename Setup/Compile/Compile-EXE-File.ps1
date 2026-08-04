@@ -72,7 +72,6 @@ foreach ($procName in $processesToStop) {
 	Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue
 	}
 }
-Start-Sleep -Seconds 1
 
 # Deleting other EXE files.
 $pathsToClean = @($programDir, $releasesDir)
