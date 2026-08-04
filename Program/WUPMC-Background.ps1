@@ -19,6 +19,7 @@ $version = "Unknown"
 $regPath = "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\Orchestrator"
 $regName = "ShutdownFlyoutOptions"
 $targetValue = $null
+$maxFileSize = 512000
 
 if (Test-Path $configFile) {
 	$content = Get-Content -Path $configFile
