@@ -6,7 +6,7 @@ REM Self-unblock.
 powershell -NoProfile -Command "$filePath = '%~f0'; if (Get-Item -LiteralPath $filePath -Stream 'Zone.Identifier' -ErrorAction SilentlyContinue) { Unblock-File -LiteralPath $filePath }"
 
 REM Main process.
-for %%f in ("%~dp0Program\WUPMC_*.exe") do (
+for %%f in ("%~dp0Program\WUPMC-Background_*.exe") do (
 	echo Processing file: "%%~nxf"...
 	
 	REM Use PowerShell to check for and remove the block.

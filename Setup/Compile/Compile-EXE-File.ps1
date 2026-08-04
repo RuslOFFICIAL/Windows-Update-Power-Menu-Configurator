@@ -23,23 +23,53 @@ if (Test-Path $configFile) {
 
 # Variables.
 $programDir = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Program"
-$inputFile = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Program\WUPMC.ps1"
-$outputFile = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Program\WUPMC_$version.exe"
 $releasesDir = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Releases"
 
+$inputFileName1 = "WUPMC"
+$inputFile1 = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Program\$inputFileName1.ps1"
+$outputFile1 = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Program\${inputFileName1}_$version.exe"
+
+$inputFileName2 = "WUPMC-Background"
+$inputFile2 = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Program\$inputFileName2.ps1"
+$outputFile2 = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Program\${inputFileName2}_$version.exe"
+
 # Check if input file exists.
-if (-not (Test-Path $inputFile)) {
-	Write-Error "Input file not found: $inputFile"
-	Write-Host "Press any key to exit..."
-	$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-	exit
+$file1Exists = Test-Path $inputFile1
+$file2Exists = Test-Path $inputFile2
+
+if (-not $file1Exists) {
+	Write-Host "Warning: Input file not found: $inputFile1. Skipping compilation for this file." -ForegroundColor Yellow
+}
+if (-not $file2Exists) {
+	Write-Host "Warning: Input file not found: $inputFile2. Skipping compilation for this file." -ForegroundColor Yellow
+}
+
+if (-not $file1Exists -and -not $file2Exists) {
+	Write-Error "No input files found to compile!"
+	pause; exit 1
+}
+
+# Create Releases directory.
+if (-not (Test-Path -Path $releasesDir -PathType Container)) {
+	try {
+		Write-Host "Releases folder not found at: $releasesDir. Creating it..." -ForegroundColor Yellow
+		New-Item -Path "$releasesDir" -ItemType Directory
+	}
+	catch {
+		Write-Error "Failed to create folder: $_"
+	}
 }
 
 # Deleting other EXE files.
 $pathsToClean = @($programDir, $releasesDir)
 foreach ($dir in $pathsToClean) {
     if (Test-Path $dir) {
-        $oldFiles = Get-ChildItem -Path "$dir\WUPMC_*.exe"
+        $oldFiles = Get-ChildItem -Path "$dir\$inputFileName1_*.exe"
+        foreach ($file in $oldFiles) {
+            Write-Host "Removing old EXE: '$($file.Name)' from '$dir'..."
+            Remove-Item $file.FullName -Force
+        }
+	$oldFiles = Get-ChildItem -Path "$dir\$inputFileName2_*.exe"
         foreach ($file in $oldFiles) {
             Write-Host "Removing old EXE: '$($file.Name)' from '$dir'..."
             Remove-Item $file.FullName -Force
@@ -47,7 +77,8 @@ foreach ($dir in $pathsToClean) {
     }
 }
 
-Write-Host "`nCompiling 'WUPMC.ps1' to EXE file..."
+# ps2exe
+Write-Host "Getting 'ps2exe' ready..."
 
 # Allow running the script.
 Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
@@ -62,32 +93,37 @@ if (-not (Get-Module -ListAvailable -Name ps2exe)) {
 Import-Module ps2exe
 
 # Compile.
-Invoke-PS2EXE -InputFile $inputFile `
-	-OutputFile $outputFile `
+# File 1.
+Write-Host "`nCompiling '$inputFileName1' to EXE file..."
+Invoke-PS2EXE -inputFile $inputFile1 `
+	-outputFile $outputFile1 `
+	-EmbedFiles @{"$env:TEMP\R&C\WUPMC\$configFileName" = $configFile} `
+	-RequireAdmin
+
+# File 2.
+Write-Host "`nCompiling '$inputFileName2' to EXE file..."
+Invoke-PS2EXE -inputFile $inputFile2 `
+	-outputFile $outputFile2 `
 	-EmbedFiles @{"$env:TEMP\R&C\WUPMC\$configFileName" = $configFile} `
 	-RequireAdmin
 
 # Copy to Releases folder.
-if (-not (Test-Path -Path $releasesDir -PathType Container)) {
-	try {
-		Write-Host "Releases folder not found at: $releasesDir. Creating it..." -ForegroundColor Yellow
-		New-Item -Path "$releasesDir" -ItemType Directory
-	}
-	catch {
-		Write-Error "Failed to create folder: $_"
-	}
+Write-Host "Copying EXEs to Releases folder..."
+if (Test-Path $outputFile1) {
+	Copy-Item -Path $outputFile1 -Destination $releasesDir -Force
+	Write-Host "Copied: WUPMC_$version.exe" -ForegroundColor Cyan
 }
-
-Write-Host "Copying EXE to Releases folder..."
-Copy-Item -Path $outputFile -Destination $releasesDir -Force
-Write-Host "File copied successfully." -ForegroundColor Cyan
+if (Test-Path $outputFile2) {
+	Copy-Item -Path $outputFile2 -Destination $releasesDir -Force
+	Write-Host "Copied: WUPMC-Background_$version.exe" -ForegroundColor Cyan
+}
 
 # Result.
-if (Test-Path $outputFile) {
-	Write-Host "Success! EXE created at: $outputFile" -ForegroundColor Green
+if ((Test-Path $outputFile1) -and (Test-Path $outputFile2)) {
+	Write-Host "`nSuccess! All EXEs created and published successfully." -ForegroundColor Green
 } else {
-	Write-Error "Compilation failed."
+	Write-Error "Compilation or copying failed for one or more files."
 }
 
-Write-Host "Press any key to exit..."
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+# End.
+pause; exit 0

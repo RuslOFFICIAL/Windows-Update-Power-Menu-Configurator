@@ -5,7 +5,7 @@ powershell -NoProfile -Command "$filePath = '%~f0'; if (Get-Item -LiteralPath $f
 
 REM Variables.
 set "ProgramDir=%~dp0"
-set "TargetFileName=WUPMC.ps1"
+set "TargetFileName=WUPMC-Background.ps1"
 set "TargetFile=%~dp0%TargetFileName%"
 
 REM Check if the file is blocked
@@ -14,7 +14,7 @@ powershell -Command "$file = Get-Item -LiteralPath '%TargetFile%' -Stream 'Zone.
 
 REM Run main process.
 echo Running "%TargetFileName%"...& echo.
-powershell.exe -ExecutionPolicy Bypass -File "%TargetFile%"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%TargetFile%"
 
 REM End.
 echo.& echo.& echo.
