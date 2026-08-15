@@ -1,3 +1,7 @@
+param(
+	[switch]$BackgroundMode
+)
+
 # Self-unblock.
 $currentAppPath = if ($PSCommandPath) { $PSCommandPath } else { ([Environment]::GetCommandLineArgs()[0]) }
 if ($currentAppPath -and (Test-Path $currentAppPath)) {
@@ -132,8 +136,12 @@ if ($registerNewTask) {
 	Write-Host "Registering '$taskName' into Task Scheduler under '$taskPath'..." -ForegroundColor Cyan
 	$filePath = $currentAppPath
 	
-	# Create action.
-	$action = New-ScheduledTaskAction -Execute $filePath
+	# Action.
+	if ($currentAppPath -like "*.ps1") {
+		$action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-WindowStyle Hidden -File `"$currentAppPath`" -BackgroundMode"
+	} else {
+		$action = New-ScheduledTaskAction -Execute $currentAppPath -Argument "-BackgroundMode"
+	}
 	
 	# Trigger to run at system startup with highest privileges
 	$trigger = New-ScheduledTaskTrigger -AtStartup
@@ -144,6 +152,29 @@ if ($registerNewTask) {
 	Write-Host "Task '$taskName' under '$taskPath' successfully registered to run at startup!" -ForegroundColor Green
 } else {
 	Write-Host "Task '$taskName' under '$taskPath' is already registered in Task Scheduler." -ForegroundColor Yellow
+}
+
+# Choice.
+if (-not $BackgroundMode) {
+	Write-Host "`nChoose an option for this window session:" -ForegroundColor Cyan
+	Write-Host "[1] Continue running this window."
+	Write-Host "[2] Run on background."
+	$choice = Read-Host "Enter your choice (1 or 2)"
+	
+	# Option 2.
+	if ($choice -eq '2') {
+		Write-Host "`nStarting background instance and closing..." -ForegroundColor Green
+		
+		if ($currentAppPath -like "*.ps1") {
+			Start-Process powershell.exe -ArgumentList "-WindowStyle Hidden -File `"$currentAppPath`" -BackgroundMode" -WindowStyle Hidden
+		} else {
+			Start-Process -FilePath $currentAppPath -ArgumentList "-BackgroundMode" -WindowStyle Hidden
+		}
+		
+		exit 0
+	} else {
+		Write-Host "`nChecking for incorrect or missing value..."
+	}
 }
 
 # Main process.
