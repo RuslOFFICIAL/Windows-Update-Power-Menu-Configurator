@@ -4,13 +4,16 @@ if ($currentAppPath -and (Test-Path $currentAppPath)) {
 	Unblock-File -Path $currentAppPath -ErrorAction SilentlyContinue
 }
 
-# Configs.
-$configFileName = "Variables.conf"
-$configFile = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Configs\$configFileName"
-
 $version = "Unknown"
 
-if (Test-Path $configFile) {
+# Configs.
+$configFileName = "Variables.conf"
+$pathsToCheck = @(
+    (Join-Path -Path $baseDir -ChildPath "..\Configs\$configFileName")
+)
+$configFile = $pathsToCheck | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
+
+if ($configFile -and (Test-Path $configFile)) {
 	Get-Content -Path $configFile | ForEach-Object {
 		$line = $_.Trim()
 		
@@ -34,10 +37,12 @@ if (Test-Path $configFile) {
 }
 
 # Defaults.
-if ($isConfig) {
-	if ("Unknown" -eq $version) {
+if ($isConfig -eq $true) {
+	if ($version -eq "Unknown") {
 		Write-Host "Warning: 'version' not found at '$configFile'. Using default version string." -ForegroundColor Yellow
 	}
+	
+	Write-Host
 }
 
 # Variables.

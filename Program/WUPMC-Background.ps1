@@ -17,17 +17,17 @@ $pathsToCheck = @(
     (Join-Path -Path $baseDir -ChildPath "..\Configs\$configFileName"),
     (Join-Path -Path $env:TEMP -ChildPath "R&C\WUPMC\$configFileName")
 )
-$configFile = $pathsToCheck | Where-Object { Test-Path $_ } | Select-Object -First 1
+$configFile = $pathsToCheck | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
 
 $isConfig = $false
 $version = "Unknown"
 $regPath = "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\Orchestrator"
 $regName = "ShutdownFlyoutOptions"
-$targetValue = 5
+$targetValue = $null
 $maxFileSize = 512000 # Bytes.
 
 # Configs.
-if (Test-Path $configFile) {
+if ($configFile -and (Test-Path $configFile)) {
 	Get-Content -Path $configFile | ForEach-Object {
 		$line = $_.Trim()
 		
@@ -51,14 +51,17 @@ if (Test-Path $configFile) {
 }
 
 # Defaults.
-if ($isConfig) {
-	if ("Unknown" -eq $version) {
+if ($isConfig -eq $true) {
+	if ($version -eq "Unknown") {
 		Write-Host "Warning: 'version' not found at '$configFile'. Using default version string." -ForegroundColor Yellow
 	}
 	
-	if ($null -eq $targetValue) {
+	if ($targetValue -eq $null) {
 		Write-Host "Warning: 'targetValue' not found in '$configFileName'. Defaulting to 5." -ForegroundColor Yellow
+		$targetValue = 5
 	}
+	
+	Write-Host
 }
 
 # Admin check.
@@ -120,7 +123,7 @@ $taskName = "WUPMC-Background"
 $taskExists = Get-ScheduledTask -TaskName $taskName -TaskPath $taskPath -ErrorAction SilentlyContinue
 $registerNewTask = $false
 
-Write-Host ""
+Write-Host
 if (-not $taskExists) {
 	$registerNewTask = $true
 } else {
@@ -185,7 +188,7 @@ if (-not $BackgroundMode) {
 }
 
 # Main process.
-Write-Host ""
+Write-Host
 while ($true) {
 	try {
 		# Ensure the Registry Path exists.
@@ -216,7 +219,7 @@ while ($true) {
 			Write-Host "Log written: $logEntry" -ForegroundColor Gray
 			Write-Host "Log file is at: " -NoNewLine -ForegroundColor Gray; Write-Host $logPath -ForegroundColor Cyan
 			
-			Write-Host ""
+			Write-Host
 		}
 	}
 	catch {
@@ -243,7 +246,7 @@ while ($true) {
 				Write-Host "CRITICAL: Could not write to file OR Event Log. Error: $($_.Exception.Message)" -ForegroundColor DarkRed
 			}
 		}
-		Write-Host ""
+		Write-Host
 	}
 
 	# Pause on # seconds.
