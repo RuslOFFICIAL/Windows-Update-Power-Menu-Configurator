@@ -4,12 +4,16 @@ if ($currentAppPath -and (Test-Path $currentAppPath)) {
 	Unblock-File -Path $currentAppPath -ErrorAction SilentlyContinue
 }
 
+# Configuration.
+$baseDir = if ($null -ne $ScriptRoot) { $ScriptRoot } else { if ($null -ne $PSScriptRoot) { $PSScriptRoot } else { [System.AppDomain]::CurrentDomain.BaseDirectory } }
+
 $version = "Unknown"
 
 # Configs.
 $configFileName = "Variables.conf"
 $pathsToCheck = @(
-    (Join-Path -Path $baseDir -ChildPath "..\Configs\$configFileName")
+	(Join-Path -Path $baseDir -ChildPath "..\..\Configs\$configFileName"),
+	(Join-Path -Path $baseDir -ChildPath "..\Configs\$configFileName")
 )
 $configFile = $pathsToCheck | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
 
@@ -129,20 +133,28 @@ if (-not (Get-Module -ListAvailable -Name ps2exe)) {
 }
 Import-Module ps2exe
 
+# Ensure temp folder exists
+$embedDir = "$env:TEMP\R&C\WUPMC"
+if (-not (Test-Path $embedDir)) {
+	New-Item -Path $embedDir -ItemType Directory -Force | Out-Null
+}
+
 # Compile.
 # File 1.
 Write-Host "`nCompiling '$inputFileName1' to EXE file..."
 Invoke-PS2EXE -inputFile $inputFile1 `
 	-outputFile $outputFile1 `
-	-EmbedFiles @{"$env:TEMP\R&C\WUPMC\$configFileName" = $configFile} `
-	-RequireAdmin
+	-EmbedFiles @{"$embedDir\$configFileName" = $configFile} `
+	-RequireAdmin `
+	-verbose
 
 # File 2.
 Write-Host "`nCompiling '$inputFileName2' to EXE file..."
 Invoke-PS2EXE -inputFile $inputFile2 `
 	-outputFile $outputFile2 `
-	-EmbedFiles @{"$env:TEMP\R&C\WUPMC\$configFileName" = $configFile} `
-	-RequireAdmin
+	-EmbedFiles @{"$embedDir\$configFileName" = $configFile} `
+	-RequireAdmin `
+	-verbose
 
 # Copy to Releases folder.
 Write-Host "Copying EXEs to Releases folder..."

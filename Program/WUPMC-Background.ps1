@@ -14,8 +14,8 @@ $baseDir = if ($null -ne $ScriptRoot) { $ScriptRoot } else { if ($null -ne $PSSc
 # Configs.
 $configFileName = "Variables.conf"
 $pathsToCheck = @(
-    (Join-Path -Path $baseDir -ChildPath "..\Configs\$configFileName"),
-    (Join-Path -Path $env:TEMP -ChildPath "R&C\WUPMC\$configFileName")
+	(Join-Path -Path $baseDir -ChildPath "..\Configs\$configFileName"),
+	(Join-Path -Path $env:TEMP -ChildPath "R&C\WUPMC\$configFileName")
 )
 $configFile = $pathsToCheck | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
 
