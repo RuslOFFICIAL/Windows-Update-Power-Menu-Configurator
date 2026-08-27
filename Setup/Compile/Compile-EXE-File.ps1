@@ -9,16 +9,35 @@ $configFileName = "Variables.conf"
 $configFile = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Configs\$configFileName"
 
 $version = "Unknown"
+
 if (Test-Path $configFile) {
-	$rawLine = (Get-Content -Path $configFile -TotalCount 1).Trim()
-	
-	if ($rawLine -match '(?i)version\s*=\s*"?([^"\s]+)"?') {
-		$version = $Matches[1]
-	} else {
-		$version = $rawLine -replace '[\s"=\\]', ''
+	Get-Content -Path $configFile | ForEach-Object {
+		$line = $_.Trim()
+		
+		# Skip empty lines and comments.
+		if (-not $line -or $line.StartsWith('#')) { return }
+		
+		# Split by the first '=' character.
+		if ($line -match '^([^=]+)=(.*)$') {
+			$key   = $Matches[1].Trim()
+			$value = $Matches[2].Trim()
+			
+			$value = $value -replace '^"|"$', ''
+			Set-Variable -Name $key -Value $value -Scope Local
+		}
 	}
+	$isConfig = $true
 } else {
-	Write-Host "Warning: $configFileName not found at $configFile. Using default version string." -ForegroundColor Yellow
+	Write-Host "Warning: File not found at '$configFile'!" -ForegroundColor Yellow
+	Write-Host "Check if you have that file or download it from GitHub repository!" -ForegroundColor Yellow
+	Write-Host
+}
+
+# Defaults.
+if ($isConfig) {
+	if ("Unknown" -eq $version) {
+		Write-Host "Warning: 'version' not found at '$configFile'. Using default version string." -ForegroundColor Yellow
+	}
 }
 
 # Variables.
@@ -90,7 +109,7 @@ foreach ($dir in $pathsToClean) {
     }
 }
 
-# ps2exe
+# ps2exe.
 Write-Host "Getting 'ps2exe' ready..."
 
 # Allow running the script.

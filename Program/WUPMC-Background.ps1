@@ -19,39 +19,46 @@ $pathsToCheck = @(
 )
 $configFile = $pathsToCheck | Where-Object { Test-Path $_ } | Select-Object -First 1
 
+$isConfig = $false
 $version = "Unknown"
 $regPath = "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\Orchestrator"
 $regName = "ShutdownFlyoutOptions"
-$targetValue = $null
+$targetValue = 5
 $maxFileSize = 512000 # Bytes.
 
+# Configs.
 if (Test-Path $configFile) {
-	$content = Get-Content -Path $configFile
-	
-	$rawLine = $content[0].Trim()
-	
-	# Version.
-	if ($rawLine -match '(?i)version\s*=\s*"?([^"\s]+)"?') {
-        	$version = $Matches[1]
-	} else {
-		$version = $rawLine -replace '[\s"=\\]', ''
+	Get-Content -Path $configFile | ForEach-Object {
+		$line = $_.Trim()
+		
+		# Skip empty lines and comments.
+		if (-not $line -or $line.StartsWith('#')) { return }
+		
+		# Split by the first '=' character.
+		if ($line -match '^([^=]+)=(.*)$') {
+			$key   = $Matches[1].Trim()
+			$value = $Matches[2].Trim()
+			
+			$value = $value -replace '^"|"$', ''
+			Set-Variable -Name $key -Value $value -Scope Local
+		}
 	}
-	
-	# TargetValue.
-	$targetLine = $content | Where-Object { $_ -match '(?i)targetValue\s*=\s*"?(\d+)"?' }
-	if ($targetLine -match 'targetValue\s*=\s*"?(\d+)"?') {
-		$targetValue = [int]$Matches[1]
-	}
+	$isConfig = $true
+} else {
+	Write-Host "Warning: File not found at '$configFile'!" -ForegroundColor Yellow
+	Write-Host "Check if you have that file or download it from GitHub repository!" -ForegroundColor Yellow
+	Write-Host
 }
 
 # Defaults.
-if ("Unknown" -eq $version) {
-	Write-Host "Warning: '$configFileName' not found at '$configFile'. Using default version string." -ForegroundColor Yellow
-}
-
-if ($null -eq $targetValue) {
-	Write-Host "Warning: targetValue not found in '$configFileName'. Defaulting to 5." -ForegroundColor Yellow
-	$targetValue = 5
+if ($isConfig) {
+	if ("Unknown" -eq $version) {
+		Write-Host "Warning: 'version' not found at '$configFile'. Using default version string." -ForegroundColor Yellow
+	}
+	
+	if ($null -eq $targetValue) {
+		Write-Host "Warning: 'targetValue' not found in '$configFileName'. Defaulting to 5." -ForegroundColor Yellow
+	}
 }
 
 # Admin check.
