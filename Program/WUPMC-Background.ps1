@@ -53,7 +53,7 @@ if ($configFile -and (Test-Path $configFile)) {
 # Defaults.
 if ($isConfig -eq $true) {
 	if ($version -eq "Unknown") {
-		Write-Host "Warning: 'version' not found at '$configFile'. Using default version string." -ForegroundColor Yellow
+		Write-Host "Warning: 'version' not found at '$configFileName'. Using default version string." -ForegroundColor Yellow
 	}
 	
 	if ($targetValue -eq $null) {
