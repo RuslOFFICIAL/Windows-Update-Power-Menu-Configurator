@@ -38,8 +38,17 @@ if ($configFile -and (Test-Path $configFile)) {
 		if ($line -match '^([^=]+)=(.*)$') {
 			$key   = $Matches[1].Trim()
 			$value = $Matches[2].Trim()
-			
 			$value = $value -replace '^"|"$', ''
+			
+			# Automatically parse hex and decimal formats.
+			if ($value -match '^0x[0-9a-fA-F]+$') {
+				try { $value = [convert]::ToInt32($value, 16) } catch {}
+			} elseif ($value -match '^[0-9a-fA-F]+$' -and $value -match '[a-fA-F]') {
+				try { $value = [convert]::ToInt32($value, 16) } catch {}
+			} elseif ($value -match '^\d+$') {
+				try { $value = [convert]::ToInt32($value, 10) } catch {}
+			}
+			
 			Set-Variable -Name $key -Value $value -Scope Local
 		}
 	}
@@ -196,20 +205,41 @@ while ($true) {
 			New-Item -Path $regPath -Force | Out-Null
 		}
 		
+		# Check property existence, type, and current value.
+		$regKey = Get-Item -Path $regPath
+		$propertyExists = $regKey.Property -contains $regName
+		$isDWord = $false
+		$currentVal = $null
+	
+		if ($propertyExists) {
+			$valKind = $regKey.GetValueKind($regName)
+			if ($valKind -eq [Microsoft.Win32.RegistryValueKind]::DWord) {
+				$isDWord = $true
+				$currentVal = $regKey.GetValue($regName)
+			}
+		}
+		
+		# If it exists but is not a DWORD, delete it.
+		if ($propertyExists -and -not $isDWord) {
+			Write-Host "[$(Get-Date)] '$regName' exists as type '$valKind' instead of DWORD. Deleting..." -ForegroundColor Yellow
+			Remove-ItemProperty -Path $regPath -Name $regName -Force
+			$propertyExists = $false
+		}
+
 		# Retrieve current value.
 		$currentValue = Get-ItemProperty -Path $regPath -Name $regName -ErrorAction SilentlyContinue
 		
-		if ($currentValue -and $currentValue.$regName -eq $targetValue) {
+		if ($propertyExists -and $isDWord -and $currentVal -eq $targetValue) {
 			# Value is correct, do nothing silently.
 		} else {
-			Write-Host "[$(Get-Date)] Value $regName is incorrect or missing. Setting to $targetValue..." -ForegroundColor Yellow
-			$oldValue = if ($currentValue) { $currentValue.$regName } else { "N/A" }
+			Write-Host "[$(Get-Date)] Setting '$regName' to '$targetValue' as DWORD..." -ForegroundColor Yellow
+			$oldValue = if ($propertyExists) { $currentVal } else { "N/A" }
 			
-			# Try to update.
-			if ($currentValue) {
-				Set-ItemProperty -Path $regPath -Name $regName -Value $targetValue -Force -ErrorAction Stop
+			# Create or Set as DWORD.
+			if ($propertyExists) {
+				Set-ItemProperty -Path $regPath -Name $regName -Value $targetValue -Type DWord -Force -ErrorAction Stop | Out-Null
 			} else {
-				New-ItemProperty -Path $regPath -Name $regName -Value $targetValue -PropertyType DWord -Force -ErrorAction Stop
+				New-ItemProperty -Path $regPath -Name $regName -Value $targetValue -PropertyType DWord -Force -ErrorAction Stop | Out-Null
 			}
 			$actionTaken = "Updated from $oldValue to $targetValue"
 			

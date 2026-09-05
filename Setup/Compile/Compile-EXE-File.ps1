@@ -28,8 +28,17 @@ if ($configFile -and (Test-Path $configFile)) {
 		if ($line -match '^([^=]+)=(.*)$') {
 			$key   = $Matches[1].Trim()
 			$value = $Matches[2].Trim()
-			
 			$value = $value -replace '^"|"$', ''
+			
+			# Automatically parse hex and decimal formats.
+			if ($value -match '^0x[0-9a-fA-F]+$') {
+				try { $value = [convert]::ToInt32($value, 16) } catch {}
+			} elseif ($value -match '^[0-9a-fA-F]+$' -and $value -match '[a-fA-F]') {
+				try { $value = [convert]::ToInt32($value, 16) } catch {}
+			} elseif ($value -match '^\d+$') {
+				try { $value = [convert]::ToInt32($value, 10) } catch {}
+			}
+			
 			Set-Variable -Name $key -Value $value -Scope Local
 		}
 	}
