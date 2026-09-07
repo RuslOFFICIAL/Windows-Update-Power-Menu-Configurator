@@ -15,7 +15,7 @@ $baseDir = if ($null -ne $ScriptRoot) { $ScriptRoot } else { if ($null -ne $PSSc
 $configFileName = "Variables.conf"
 $pathsToCheck = @(
 	(Join-Path -Path $baseDir -ChildPath "..\Configs\$configFileName"),
-	(Join-Path -Path $env:TEMP -ChildPath "R&C\WUPMC\$configFileName")
+	(Join-Path -Path $env:SystemDrive -ChildPath "ProgramData\R&C\WUPMC\$configFileName")
 )
 $configFile = $pathsToCheck | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
 
@@ -82,12 +82,7 @@ if (-not $isAdmin) {
 }
 
 # Log file location.
-$loggedInUser = (Get-CimInstance Win32_ComputerSystem).UserName -replace '.*\\'
-if ($loggedInUser) {
-	$basePath = "C:\Users\$loggedInUser\AppData\Local\Temp\R&C\WUPMC"
-} else {
-	$basePath = Join-Path -Path $env:LOCALAPPDATA -ChildPath "Temp\R&C\WUPMC"
-}
+$basePath = "$env:SystemDrive\ProgramData\R&C\WUPMC"
 if (-not (Test-Path $basePath)) {
 	New-Item -Path $basePath -ItemType Directory -Force | Out-Null
 }
@@ -108,8 +103,8 @@ function Write-Log {
 				$fileContent = $null
 				break
 			}
-		$fileContent | Set-Content -Path $logPath
-		if ((Get-Item $logPath).Length -le $maxFileSize) { break }
+			$fileContent | Set-Content -Path $logPath
+			if ((Get-Item $logPath).Length -le $maxFileSize) { break }
 		}
 		if ((Test-Path $logPath) -and ((Get-Item $logPath).Length -gt $maxFileSize)) {
 			Set-Content -Path $logPath -Value $null

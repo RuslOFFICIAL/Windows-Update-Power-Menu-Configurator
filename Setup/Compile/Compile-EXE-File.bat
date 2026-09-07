@@ -13,6 +13,4 @@ echo Running "Compile-EXE-File.ps1"...& echo.
 powershell.exe -ExecutionPolicy Bypass -File "%Compile%\Compile-EXE-File.ps1"
 
 REM End.
-echo.& echo.& echo.
-echo End of process...
-pause
+echo.& echo.
