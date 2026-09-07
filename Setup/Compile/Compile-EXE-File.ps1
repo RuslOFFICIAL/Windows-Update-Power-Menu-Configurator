@@ -143,7 +143,7 @@ if (-not (Get-Module -ListAvailable -Name ps2exe)) {
 Import-Module ps2exe
 
 # Ensure temp folder exists
-$embedDir = "$env:SystemDrive\ProgramData\R&C\WUPMC"
+$embedDir = Join-Path $env:ProgramData "R&C\WUPMC"
 if (-not (Test-Path $embedDir)) {
 	New-Item -Path $embedDir -ItemType Directory -Force | Out-Null
 }
