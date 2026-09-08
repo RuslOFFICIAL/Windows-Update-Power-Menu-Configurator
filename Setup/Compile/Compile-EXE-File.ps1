@@ -142,18 +142,12 @@ if (-not (Get-Module -ListAvailable -Name ps2exe)) {
 }
 Import-Module ps2exe
 
-# Ensure temp folder exists
-$embedDir = Join-Path $env:ProgramData "R&C\WUPMC"
-if (-not (Test-Path $embedDir)) {
-	New-Item -Path $embedDir -ItemType Directory -Force | Out-Null
-}
-
 # Compile.
 # File 1.
 Write-Host "`nCompiling '$inputFileName1' to EXE file..."
 Invoke-PS2EXE -inputFile $inputFile1 `
 	-outputFile $outputFile1 `
-	-EmbedFiles @{"$embedDir\$configFileName" = $configFile} `
+	-EmbedFiles @{"%ProgramData%\R&C\WUPMC\$configFileName" = $configFile} `
 	-RequireAdmin `
 	-verbose
 
@@ -161,7 +155,7 @@ Invoke-PS2EXE -inputFile $inputFile1 `
 Write-Host "`nCompiling '$inputFileName2' to EXE file..."
 Invoke-PS2EXE -inputFile $inputFile2 `
 	-outputFile $outputFile2 `
-	-EmbedFiles @{"$embedDir\$configFileName" = $configFile} `
+	-EmbedFiles @{"%ProgramData%\R&C\WUPMC\$configFileName" = $configFile} `
 	-RequireAdmin `
 	-verbose
 
