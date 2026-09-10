@@ -120,6 +120,7 @@ $errorOccurred = $false
 
 Write-Host "Windows-Update-Power-Menu-Configurator (WUPMC) Version $version-Background" -ForegroundColor Green
 Write-Host "Press 'Ctrl+C' to stop monitoring." -ForegroundColor Cyan
+Write-Host "Please wait..."
 
 # Task scheduler.
 $taskPath = "\R&C\"
