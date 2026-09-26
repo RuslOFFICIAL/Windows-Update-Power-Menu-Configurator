@@ -59,6 +59,13 @@ if ($isConfig -eq $true) {
 }
 
 # Variables.
+$versionNumbers = [regex]::Matches($version, '\d+') | ForEach-Object { $_.Value }
+if ($versionNumbers.Count -ge 2) {
+	$ps2exeVersion = "$($versionNumbers[0]).$($versionNumbers[1]).0"
+} else {
+	$ps2exeVersion = "0.0.0"
+}
+
 $programDir = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Program"
 $releasesDir = Join-Path -Path $PSScriptRoot -ChildPath "..\..\Releases"
 
@@ -147,16 +154,18 @@ Import-Module ps2exe
 Write-Host "`nCompiling '$inputFileName1' to EXE file..."
 Invoke-PS2EXE -inputFile $inputFile1 `
 	-outputFile $outputFile1 `
-	-EmbedFiles @{"%ProgramData%\R&C\WUPMC\$configFileName" = $configFile} `
+	-EmbedFiles @{"`%ProgramData`%\R&C\WUPMC\$configFileName" = $configFile} `
 	-RequireAdmin `
+	-version "$ps2exeVersion" `
 	-verbose
 
 # File 2.
 Write-Host "`nCompiling '$inputFileName2' to EXE file..."
 Invoke-PS2EXE -inputFile $inputFile2 `
 	-outputFile $outputFile2 `
-	-EmbedFiles @{"%ProgramData%\R&C\WUPMC\$configFileName" = $configFile} `
+	-EmbedFiles @{"`%ProgramData`%\R&C\WUPMC\$configFileName" = $configFile} `
 	-RequireAdmin `
+	-version "$ps2exeVersion" `
 	-verbose
 
 # Copy to Releases folder.
