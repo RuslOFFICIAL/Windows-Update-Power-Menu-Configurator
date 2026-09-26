@@ -43,3 +43,4 @@ Binary (B1.B2.B3.B4) meaning. 1 means enables, 0 means disabled. More:
  - B2 means the status of "Shutdown" button.
  - B3 means the status of "Update and Restart" button.
  - B4 means the status of "Restart" button.
+ 
