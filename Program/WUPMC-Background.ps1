@@ -81,6 +81,15 @@ if (-not $isAdmin) {
 	pause; exit 1
 }
 
+# Close other running instances of WUPMC.
+Write-Host "Stopping any running WUPMC processes..." -ForegroundColor Yellow
+$currentPID = $PID
+Get-Process | Where-Object { 
+	($_.Name -like "WUPMC*" -or $_.Name -like "WUPMC-Background*") -and $_.Id -ne $currentPID 
+} | ForEach-Object {
+	Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue
+}
+
 # Log file location.
 $basePath = Join-Path $env:ProgramData "R&C\WUPMC"
 if (-not (Test-Path $basePath)) {
@@ -118,7 +127,7 @@ function Write-Log {
 $actionTaken = "Unknown"
 $errorOccurred = $false
 
-Write-Host "Windows-Update-Power-Menu-Configurator (WUPMC) Version $version-Background" -ForegroundColor Green
+Write-Host "`nWindows-Update-Power-Menu-Configurator (WUPMC) Version $version-Background" -ForegroundColor Green
 Write-Host "Press 'Ctrl+C' to stop monitoring." -ForegroundColor Cyan
 Write-Host "Please wait..."
 
@@ -177,7 +186,9 @@ if (-not $BackgroundMode) {
 	$choice = Read-Host "Enter your choice (1 or 2)"
 	
 	# Option 2.
-	if ($choice -eq '2') {
+	if ($choice -eq '1') {
+		Write-Host "`nChecking for incorrect or missing value..."
+	} else {
 		Write-Host "`nStarting background instance and closing..." -ForegroundColor Green
 		
 		if ($currentAppPath -like "*.ps1") {
@@ -187,8 +198,6 @@ if (-not $BackgroundMode) {
 		}
 		
 		exit 0
-	} else {
-		Write-Host "`nChecking for incorrect or missing value..."
 	}
 }
 
