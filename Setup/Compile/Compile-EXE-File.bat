@@ -9,8 +9,8 @@ REM Making shortcuts to folders.
 set "Compile=%~dp0"
 
 REM Run file.
-echo Running "Compile-EXE-File.ps1"...& echo.
+echo Running "Compile-EXE-File.ps1"... & echo.
 powershell.exe -ExecutionPolicy Bypass -File "%Compile%\Compile-EXE-File.ps1"
 
 REM End.
-echo.& echo.
+echo. & echo.

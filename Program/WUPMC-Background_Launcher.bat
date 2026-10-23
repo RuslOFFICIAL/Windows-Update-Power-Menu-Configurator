@@ -6,9 +6,9 @@ powershell -NoProfile -Command "$filePath = '%~f0'; if (Get-Item -LiteralPath $f
 REM Variables.
 set "ProgramDir=%~dp0"
 set "TargetFileName=WUPMC-Background.ps1"
-set "TargetFile=%~dp0%TargetFileName%"
+set "TargetFile=%ProgramDir%%TargetFileName%"
 
-REM Check if the file is blocked
+REM Check if the file is blocked.
 echo Checking if "%TargetFile%" is blocked...
 powershell -Command "$file = Get-Item -LiteralPath '%TargetFile%' -Stream 'Zone.Identifier' -ErrorAction SilentlyContinue; if ($file) { Write-Host 'File is blocked. Unblocking...'; Unblock-File -Path '%TargetFile%'; Write-Host 'Done.' } else { Write-Host 'File is not blocked.' }"
 

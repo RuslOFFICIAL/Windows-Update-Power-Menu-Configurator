@@ -56,5 +56,5 @@ goto End
 REM End.
 :End
 endlocal
-echo.& echo Done!& echo Your release is ready inside the "Releases" folder.
+echo. & echo Done! & echo Your release is ready inside the "Releases" folder.
 pause
