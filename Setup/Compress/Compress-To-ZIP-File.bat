@@ -13,7 +13,7 @@ REM Configs.
 if exist "%VariablesFile%" (
 	for /f "usebackq eol=# tokens=1,2 delims==" %%A in ("%VariablesFile%") do set "%%A=%%~B"
 ) else (
-	echo Warning: File not found at '%VariablesFile%'! & echo Check if you have that file or download it from GitHub repository! & echo.
+	echo Warning: File not found at '%VariablesFile%'! & echo Check if there is that file or download it from GitHub repository! & echo.
 )
 
 goto CompressingProc
@@ -56,5 +56,5 @@ goto End
 REM End.
 :End
 endlocal
-echo. & echo Done! & echo Your release is ready inside the "Releases" folder.
+echo. & echo Done! & echo The release is ready inside the "Releases" folder.
 pause

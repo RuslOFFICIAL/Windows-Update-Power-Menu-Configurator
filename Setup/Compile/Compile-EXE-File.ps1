@@ -45,7 +45,7 @@ if ($configFile -and (Test-Path $configFile)) {
 	$isConfig = $true
 } else {
 	Write-Host "Warning: File not found at '$configFile'!" -ForegroundColor Yellow
-	Write-Host "Check if you have that file or download it from GitHub repository!" -ForegroundColor Yellow
+	Write-Host "Check if there is that file or download it from GitHub repository!" -ForegroundColor Yellow
 	Write-Host
 }
 

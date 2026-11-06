@@ -51,7 +51,7 @@ if ($configFile -and (Test-Path $configFile)) {
 	$isConfig = $true
 } else {
 	Write-Host "Warning: File not found at '$configFile'!" -ForegroundColor Yellow
-	Write-Host "Check if you have that file or download it from GitHub repository!" -ForegroundColor Yellow
+	Write-Host "Check if there is that file or download it from GitHub repository!" -ForegroundColor Yellow
 	Write-Host
 }
 
@@ -126,7 +126,7 @@ $errorOccurred = $false
 Write-Host "`nWindows-Update-Power-Menu-Configurator (WUPMC) Version $version" -ForegroundColor Green
 
 # Confirmation.
-$confirmation = Read-Host "Are you sure you want to run this script? (Y/N)"
+$confirmation = Read-Host "Run this script? (Y/N)"
 
 if ($confirmation -ne 'Y' -and $confirmation -ne 'y') {
 	Write-Host "`nOperation cancelled by user." -ForegroundColor Yellow

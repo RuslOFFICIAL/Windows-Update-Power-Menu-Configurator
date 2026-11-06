@@ -55,7 +55,7 @@ if ($configFile -and (Test-Path $configFile)) {
 	$isConfig = $true
 } else {
 	Write-Host "Warning: File not found at '$configFile'!" -ForegroundColor Yellow
-	Write-Host "Check if you have that file or download it from GitHub repository!" -ForegroundColor Yellow
+	Write-Host "Check if there is that file or download it from GitHub repository!" -ForegroundColor Yellow
 	Write-Host
 }
 
@@ -183,7 +183,7 @@ if (-not $BackgroundMode) {
 	Write-Host "`nChoose an option for this window session:" -ForegroundColor Cyan
 	Write-Host "[1] Continue running this window."
 	Write-Host "[2] Run on background."
-	$choice = Read-Host "Enter your choice (1 or 2)"
+	$choice = Read-Host "Enter the choice (1 or 2)"
 	
 	# Option 2.
 	if ($choice -eq '1') {
