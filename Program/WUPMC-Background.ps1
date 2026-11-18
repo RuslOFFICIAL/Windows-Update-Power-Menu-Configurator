@@ -36,16 +36,18 @@ if ($configFile -and (Test-Path $configFile)) {
 		
 		# Split by the first '=' character.
 		if ($line -match '^([^=]+)=(.*)$') {
-			$key   = $Matches[1].Trim()
+			$key = $Matches[1].Trim()
 			$value = $Matches[2].Trim()
 			$value = $value -replace '^"|"$', ''
 			
 			# Automatically parse hex and decimal formats.
 			if ($value -match '^0x[0-9a-fA-F]+$') {
 				try { $value = [convert]::ToInt32($value, 16) } catch {}
-			} elseif ($value -match '^[0-9a-fA-F]+$' -and $value -match '[a-fA-F]') {
+			}
+			elseif ($value -match '^[0-9a-fA-F]+$' -and $value -match '[a-fA-F]') {
 				try { $value = [convert]::ToInt32($value, 16) } catch {}
-			} elseif ($value -match '^\d+$') {
+			}
+			elseif ($value -match '^\d+$') {
 				try { $value = [convert]::ToInt32($value, 10) } catch {}
 			}
 			
@@ -53,19 +55,20 @@ if ($configFile -and (Test-Path $configFile)) {
 		}
 	}
 	$isConfig = $true
-} else {
+}
+else {
 	Write-Host "Warning: File not found at '$configFile'!" -ForegroundColor Yellow
 	Write-Host "Check if there is that file or download it from GitHub repository!" -ForegroundColor Yellow
 	Write-Host
 }
 
 # Defaults.
-if ($isConfig -eq $true) {
+if ($isConfig) {
 	if ($version -eq "Unknown") {
 		Write-Host "Warning: 'version' not found at '$configFileName'. Using default version string." -ForegroundColor Yellow
 	}
 	
-	if ($targetValue -eq $null) {
+	if ($null -eq $targetValue) {
 		Write-Host "Warning: 'targetValue' not found in '$configFileName'. Defaulting to 5." -ForegroundColor Yellow
 		$targetValue = 5
 	}
@@ -108,7 +111,8 @@ function Write-Log {
 			$dropCount = [Math]::Max(1, [int]($fileContent.Count * 0.2))
 			if ($fileContent.Count -gt $dropCount) {
 				$fileContent = $fileContent[$dropCount..($fileContent.Count - 1)]
-			} else {
+			}
+			else {
 				$fileContent = $null
 				break
 			}
@@ -125,7 +129,6 @@ function Write-Log {
 
 # Initialize variables.
 $actionTaken = "Unknown"
-$errorOccurred = $false
 
 Write-Host "`nWindows-Update-Power-Menu-Configurator (WUPMC) Version $version-Background" -ForegroundColor Green
 Write-Host "Press 'Ctrl+C' to stop monitoring." -ForegroundColor Cyan
@@ -140,13 +143,14 @@ $registerNewTask = $false
 Write-Host
 if (-not $taskExists) {
 	$registerNewTask = $true
-} else {
+}
+else {
 	$taskDetails = Get-ScheduledTask -TaskName $taskName -TaskPath $taskPath
 	$currentExecutePath = $taskDetails.Actions.Execute
 	$currentUserId = $taskDetails.Principal.UserId
 
 	$normalizedExisting = [System.IO.Path]::GetFullPath($currentExecutePath)
-	$normalizedCurrent  = [System.IO.Path]::GetFullPath($currentAppPath)
+	$normalizedCurrent = [System.IO.Path]::GetFullPath($currentAppPath)
 
 	$isSystemAccount = ($currentUserId -eq "S-1-5-18" -or $currentUserId -eq "NT AUTHORITY\SYSTEM" -or $currentUserId -like "*SYSTEM*")
 
@@ -158,12 +162,12 @@ if (-not $taskExists) {
 
 if ($registerNewTask) {
 	Write-Host "Registering '$taskName' into Task Scheduler under '$taskPath'..." -ForegroundColor Cyan
-	$filePath = $currentAppPath
 	
 	# Action.
 	if ($currentAppPath -like "*.ps1") {
 		$action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-WindowStyle Hidden -File `"$currentAppPath`" -BackgroundMode"
-	} else {
+	}
+ else {
 		$action = New-ScheduledTaskAction -Execute $currentAppPath -Argument "-BackgroundMode"
 	}
 	
@@ -174,7 +178,8 @@ if ($registerNewTask) {
 	
 	Register-ScheduledTask -TaskName $taskName -TaskPath $taskPath -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Force | Out-Null
 	Write-Host "Task '$taskName' under '$taskPath' successfully registered to run at startup!" -ForegroundColor Green
-} else {
+}
+else {
 	Write-Host "Task '$taskName' under '$taskPath' is already registered in Task Scheduler." -ForegroundColor Yellow
 }
 
@@ -188,12 +193,14 @@ if (-not $BackgroundMode) {
 	# Option 2.
 	if ($choice -eq '1') {
 		Write-Host "`nChecking for incorrect or missing value..."
-	} else {
+	}
+ else {
 		Write-Host "`nStarting background instance and closing..." -ForegroundColor Green
 		
 		if ($currentAppPath -like "*.ps1") {
 			Start-Process powershell.exe -ArgumentList "-WindowStyle Hidden -File `"$currentAppPath`" -BackgroundMode" -WindowStyle Hidden
-		} else {
+		}
+		else {
 			Start-Process -FilePath $currentAppPath -ArgumentList "-BackgroundMode" -WindowStyle Hidden
 		}
 		
@@ -230,20 +237,19 @@ while ($true) {
 			Remove-ItemProperty -Path $regPath -Name $regName -Force
 			$propertyExists = $false
 		}
-
-		# Retrieve current value.
-		$currentValue = Get-ItemProperty -Path $regPath -Name $regName -ErrorAction SilentlyContinue
 		
 		if ($propertyExists -and $isDWord -and $currentVal -eq $targetValue) {
 			# Value is correct, do nothing silently.
-		} else {
+		}
+		else {
 			Write-Host "[$(Get-Date)] Setting '$regName' to '$targetValue' as DWORD..." -ForegroundColor Yellow
 			$oldValue = if ($propertyExists) { $currentVal } else { "N/A" }
 			
 			# Create or Set as DWORD.
 			if ($propertyExists) {
 				Set-ItemProperty -Path $regPath -Name $regName -Value $targetValue -Type DWord -Force -ErrorAction Stop | Out-Null
-			} else {
+			}
+			else {
 				New-ItemProperty -Path $regPath -Name $regName -Value $targetValue -PropertyType DWord -Force -ErrorAction Stop | Out-Null
 			}
 			$actionTaken = "Updated from $oldValue to $targetValue"

@@ -32,16 +32,18 @@ if ($configFile -and (Test-Path $configFile)) {
 		
 		# Split by the first '=' character.
 		if ($line -match '^([^=]+)=(.*)$') {
-			$key   = $Matches[1].Trim()
+			$key = $Matches[1].Trim()
 			$value = $Matches[2].Trim()
 			$value = $value -replace '^"|"$', ''
 			
 			# Automatically parse hex and decimal formats.
 			if ($value -match '^0x[0-9a-fA-F]+$') {
 				try { $value = [convert]::ToInt32($value, 16) } catch {}
-			} elseif ($value -match '^[0-9a-fA-F]+$' -and $value -match '[a-fA-F]') {
+			}
+			elseif ($value -match '^[0-9a-fA-F]+$' -and $value -match '[a-fA-F]') {
 				try { $value = [convert]::ToInt32($value, 16) } catch {}
-			} elseif ($value -match '^\d+$') {
+			}
+			elseif ($value -match '^\d+$') {
 				try { $value = [convert]::ToInt32($value, 10) } catch {}
 			}
 			
@@ -49,19 +51,20 @@ if ($configFile -and (Test-Path $configFile)) {
 		}
 	}
 	$isConfig = $true
-} else {
+}
+else {
 	Write-Host "Warning: File not found at '$configFile'!" -ForegroundColor Yellow
 	Write-Host "Check if there is that file or download it from GitHub repository!" -ForegroundColor Yellow
 	Write-Host
 }
 
 # Defaults.
-if ($isConfig -eq $true) {
+if ($isConfig) {
 	if ($version -eq "Unknown") {
 		Write-Host "Warning: 'version' not found at '$configFileName'. Using default version string." -ForegroundColor Yellow
 	}
 	
-	if ($targetValue -eq $null) {
+	if ($null -eq $targetValue) {
 		Write-Host "Warning: 'targetValue' not found in '$configFileName'. Defaulting to 5." -ForegroundColor Yellow
 		$targetValue = 5
 	}
@@ -104,7 +107,8 @@ function Write-Log {
 			$dropCount = [Math]::Max(1, [int]($fileContent.Count * 0.2))
 			if ($fileContent.Count -gt $dropCount) {
 				$fileContent = $fileContent[$dropCount..($fileContent.Count - 1)]
-			} else {
+			}
+			else {
 				$fileContent = $null
 				break
 			}
@@ -167,14 +171,16 @@ try {
 	if ($propertyExists -and $isDWord -and $currentVal -eq $targetValue) {
 		Write-Host "[$(Get-Date)] Value '$regName' is already '$targetValue' (DWORD). No changes needed." -ForegroundColor Cyan
 		$actionTaken = "No Change (Value is $targetValue)"
-	} else {
+	}
+ else {
 		Write-Host "[$(Get-Date)] Setting '$regName' to '$targetValue' as DWORD..." -ForegroundColor Yellow
 		$oldValue = if ($propertyExists) { $currentVal } else { "N/A" }
 		
 		# Create or Set as DWORD.
 		if ($propertyExists) {
 			Set-ItemProperty -Path $regPath -Name $regName -Value $targetValue -Type DWord -Force -ErrorAction Stop | Out-Null
-		} else {
+		}
+		else {
 			New-ItemProperty -Path $regPath -Name $regName -Value $targetValue -PropertyType DWord -Force -ErrorAction Stop | Out-Null
 		}
 		$actionTaken = "Updated from $oldValue to $targetValue"
@@ -200,7 +206,7 @@ catch {
 		Write-Host "Failed to write to log file. Writing to Event Log instead..." -ForegroundColor Red
 		try {
 			if (-not [System.Diagnostics.EventLog]::SourceExists("WUPMC_Error-Log")) {
-			New-EventLog -LogName Application -Source "WUPMC_Error-Log" -ErrorAction SilentlyContinue
+				New-EventLog -LogName Application -Source "WUPMC_Error-Log" -ErrorAction SilentlyContinue
 			}
 			Write-EventLog -LogName Application -Source "WUPMC_Error-Log" -EntryType Error -EventId 1000 -Message "Script Error: $errorMsg"
 			Write-Host "Error written to Windows Event Viewer." -ForegroundColor Red
